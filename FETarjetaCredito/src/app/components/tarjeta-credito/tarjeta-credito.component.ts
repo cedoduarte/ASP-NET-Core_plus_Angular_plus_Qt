@@ -11,6 +11,8 @@ import { TarjetaService } from 'src/app/services/tarjeta.service';
 export class TarjetaCreditoComponent implements OnInit {
   listTarjetas: any[] = [];
   form: FormGroup;
+  accion: string = "Agregar";
+  id: number | undefined;
 
   constructor(private fb: FormBuilder,
               private toastr: ToastrService,
@@ -28,37 +30,189 @@ export class TarjetaCreditoComponent implements OnInit {
     this.obtenerTarjetas();
   }
 
-  obtenerTarjetas() {
-    this.tarjetaService.getListTarjetas().subscribe({
+  /**
+   * se ha hecho "submit" en el formulario de tarjeta
+   * 1. se puede guardar nueva tarjeta
+   * 2. se puede actualizar tarjeta existente
+   */
+   guardarTarjetaSubmitButtonClicked() {
+    const tarjeta = this.getCurrentTarjetaFromForm();
+    if (this.id === undefined) {
+      // agregamos una tarjeta nueva
+      this.addNewTarjeta(tarjeta);
+    } else {
+      // editamos una tarjeta existente
+      this.updateExistingTarjeta(tarjeta);
+    }
+  }
+
+  /**
+   * se ha hecho click en el botón de "editar" tarjeta
+   */
+   editarTarjetaButtonClicked(tarjeta: any) {
+    this.accion = "Editar";
+    this.id = tarjeta.id;
+    console.log("selected id: " + this.id);
+    this.displayTarjetaInForm(tarjeta);
+  }
+
+  /**
+   * se ha hecho "click" en el botón de "eliminar" tarjeta
+   */
+   eliminarTarjetaButtonClicked(id: number) {
+    this.tarjetaService.deleteTarjeta(id).subscribe({
       next: c => {
-        console.log(c);
-        this.listTarjetas = c;
+        // en este punto la tarjeta ya fue eliminada
+        this.tarjetaDeleted();
       },
-      error: error => {
-        console.log(error);
+      error: e => {
+        // en este punto la tarjeta no pudo ser eliminada
+        this.tarjetaDeletedError(e.message);
       },
       complete: () => {
-        console.log('Request complete');
+        console.log("Request completed");
       }
     });
   }
 
-  agregarTarjeta() {
-    console.log(this.form);
+  /**
+   * muestra todas las tarjetas de la base de datos en la tabla de datos
+   */
+   obtenerTarjetas() {
+    this.tarjetaService.getListTarjetas().subscribe({
+      next: c => {
+        // en este punto ya tenemos la lista de tarjetas descargada del servidor
+        this.listTarjetas = c;
+      },
+      error: e => {
+        // en este punto no se pudo obtener la descarga de las tarjetas del servidor
+        this.obtenerTarjetasError(e.message);
+      },
+      complete: () => {
+        console.log("Request completed");
+      }
+    });
+  }
 
-    const tarjeta: any = {
+  /**
+   * obtiene la tarjeta que está siendo representada en el form
+   */
+   getCurrentTarjetaFromForm(): any {
+    return {
+      id: this.id, // the "id" comes from selected tarjeta in table
       titular: this.form.get("titular")?.value,
       numeroTarjeta: this.form.get("numeroTarjeta")?.value,
       fechaExpiracion: this.form.get("fechaExpiracion")?.value,
       cvv: this.form.get("cvv")?.value
     };
-    this.listTarjetas.push(tarjeta);
-    this.toastr.success("¡La tarjeta fue registrada correctamente!", "Tarjeta Registrada");
+  }
+
+  /**
+   * agrega una nueva tarjeta a la base de datos
+   */
+  addNewTarjeta(tarjeta: any) {
+    this.tarjetaService.saveTarjeta(tarjeta).subscribe({
+      next: c => {
+        // en este punto la tarjeta ya fue grabada en la base de datos
+        this.tarjetaSaved();
+      },
+      error: e => {
+        // en este punto la tarjeta no fue grabada en la base de datos
+        this.tarjetaSavedError(e.message);
+      },
+      complete: () => {
+        console.log("Request completed");
+      }
+    });
+  }
+
+  /**
+   * actualiza una tarjeta existente
+   */
+   updateExistingTarjeta(tarjeta: any) {
+    if (this.id !== undefined) {
+      console.log("intentando actualizar");
+      this.tarjetaService.updateTarjeta(this.id, tarjeta).subscribe({
+        next: C => {
+          // en este punto la tarjeta ya fue modificada en la base de datos
+          this.tarjetaUpdated();
+        },
+        error: e => {
+          // en este punto la tarjeta no pudo ser modificada en la base de datos
+          this.tarjetaUpdatedError(e.message);
+        },
+        complete: () => {
+          console.log("Request completed");
+        }
+      });
+    }
+  }
+
+  /**
+   * muestra una tarjeta en el form
+   */
+   displayTarjetaInForm(tarjeta: any) {
+    this.form.patchValue({
+      titular: tarjeta.titular,
+      numeroTarjeta: tarjeta.numeroTarjeta,
+      fechaExpiracion: tarjeta.fechaExpiracion,
+      cvv: tarjeta.cvv
+    });
+  }
+
+  /**
+   * tarjeta se ha eliminado correctamente de la base de datos
+   */
+   tarjetaDeleted() {
+    this.toastr.error("¡La tarjeta fue eliminada correctamente!", "Tarjeta Eliminada");
+    this.obtenerTarjetas();
+  }
+
+  /**
+   * la tarjeta no pudo ser eliminada
+   */
+   tarjetaDeletedError(message: string) {
+    this.toastr.error(message, "Error de Eliminación");
+  }
+
+  /**
+   * tarjeta fue guardada en la base de datos correctamente
+   */
+  tarjetaSaved() {
+    this.toastr.success("La tarjeta fue registrada correctamente", "Tarjeta Registrada");
+    this.obtenerTarjetas();
     this.form.reset();
   }
 
-  eliminarTarjeta(index: number) {
-    this.listTarjetas.splice(index, 1);
-    this.toastr.error("¡La tarjeta fue eliminada correctamente!", "Tarjeta Eliminada");
+  /**
+   * la tarjeta no pudo ser guardada en la base de datos
+   */
+  tarjetaSavedError(message: string) {
+    this.toastr.error(message, "Error de Guardado");
+  }
+
+  /**
+   * tarjeta fue actualizada correctamente
+   */
+  tarjetaUpdated() {
+    this.form.reset();
+    this.accion = "Agregar";
+    this.id = undefined;
+    this.toastr.info("La tarjeta fue actualizada correctamente", "Tarjeta Actualizada");
+    this.obtenerTarjetas();
+  }
+
+  /**
+   * la tarjeta no pudo ser actualizada
+   */
+  tarjetaUpdatedError(message: string) {
+    this.toastr.error(message, "Error de Actualización");
+  }
+
+  /**
+   * la tarjeta no pudo ser guardada en la base de datos
+   */
+   obtenerTarjetasError(message: string) {
+    this.toastr.error(message, "Error de Lectura");
   }
 }

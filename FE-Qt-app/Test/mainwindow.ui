@@ -11,18 +11,44 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Tarjeta de Crédito</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="res.qrc">
+    <normaloff>:/img/card.png</normaloff>:/img/card.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="1" column="4">
-     <widget class="QPushButton" name="addRecordButton">
-      <property name="text">
-       <string>Add Record</string>
-      </property>
+    <item row="2" column="0" colspan="7">
+     <widget class="QTableWidget" name="tableTarjetaCredito">
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Titular</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Fecha Expiración</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Número de Tarjeta</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>CVV</string>
+       </property>
+      </column>
      </widget>
     </item>
-    <item row="0" column="0" colspan="5">
+    <item row="0" column="0" colspan="7">
      <widget class="QFrame" name="frame">
       <property name="frameShape">
        <enum>QFrame::Box</enum>
@@ -75,16 +101,35 @@
      </widget>
     </item>
     <item row="1" column="3">
-     <widget class="QPushButton" name="editRecord">
+     <widget class="QPushButton" name="addRecordButton">
       <property name="text">
-       <string>Edit Record</string>
+       <string>Add Record</string>
+      </property>
+      <property name="icon">
+       <iconset resource="res.qrc">
+        <normaloff>:/img/add.png</normaloff>:/img/add.png</iconset>
       </property>
      </widget>
     </item>
     <item row="1" column="0">
      <widget class="QPushButton" name="getAllTarjetaCreditoButton">
       <property name="text">
-       <string>Get All Records</string>
+       <string>Refresh</string>
+      </property>
+      <property name="icon">
+       <iconset resource="res.qrc">
+        <normaloff>:/img/refresh.png</normaloff>:/img/refresh.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QPushButton" name="deleteRecordButton">
+      <property name="text">
+       <string>Delete Record</string>
+      </property>
+      <property name="icon">
+       <iconset resource="res.qrc">
+        <normaloff>:/img/delete.png</normaloff>:/img/delete.png</iconset>
       </property>
      </widget>
     </item>
@@ -101,45 +146,22 @@
       </property>
      </spacer>
     </item>
-    <item row="2" column="0" colspan="5">
-     <widget class="QTableWidget" name="tableTarjetaCredito">
-      <column>
-       <property name="text">
-        <string>ID</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Titular</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Fecha Expiración</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Número de Tarjeta</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>CVV</string>
-       </property>
-      </column>
-     </widget>
-    </item>
     <item row="1" column="2">
-     <widget class="QPushButton" name="deleteRecordButton">
+     <widget class="QPushButton" name="editRecord">
       <property name="text">
-       <string>Delete Record</string>
+       <string>Edit Record</string>
+      </property>
+      <property name="icon">
+       <iconset resource="res.qrc">
+        <normaloff>:/img/edit.png</normaloff>:/img/edit.png</iconset>
       </property>
      </widget>
     </item>
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>

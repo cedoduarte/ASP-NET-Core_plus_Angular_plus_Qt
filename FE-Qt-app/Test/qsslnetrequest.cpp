@@ -26,7 +26,7 @@ void QSslNetRequest::init()
 
 void QSslNetRequest::setPeerVerifyModeToNone()
 {
-    QSslConfiguration conf = sslConfiguration();
-    conf.setPeerVerifyMode(QSslSocket::VerifyNone);
-    setSslConfiguration(conf);
+    QSslConfiguration sslConfig = sslConfiguration();
+    sslConfig.setPeerVerifyMode(QSslSocket::VerifyNone);
+    setSslConfiguration(sslConfig);
 }

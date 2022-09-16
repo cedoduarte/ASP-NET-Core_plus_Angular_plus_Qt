@@ -4,6 +4,8 @@
 #include "qsslnetrequest.h"
 #include "qsslnetaccessmanager.h"
 
+#include "qflexiblejsonobject.h"
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -30,37 +32,40 @@ MainWindow::~MainWindow()
 
 void MainWindow::requestFinished(QNetworkReply *reply)
 {
-    const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    qDebug() << "statusCode:" << statusCode;
-    qDebug() << "error enum:" << reply->error();
-    qDebug() << "error string:" << reply->errorString();
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        qDebug() << "statusCode:" << statusCode;
+        qDebug() << "error enum:" << reply->error();
+        qDebug() << "error string:" << reply->errorString();
+        return;
+    }
+
     QByteArray responseData = reply->readAll();
     qDebug() << "read-all:" << responseData;
-    if (m_operation == Get)
+
+    switch (m_operation)
     {
-        ui->tableTarjetaCredito->setRowCount(0);
-        QJsonArray array = QJsonDocument::fromJson(responseData).array();
-        for (const QJsonValue &value : array)
+        case Get:
         {
-            QJsonObject tarjetaCredito = value.toObject();
-            appendTarjetaCredito(tarjetaCredito.value("id").toInt(),
-                                 tarjetaCredito.value("titular").toString(),
-                                 tarjetaCredito.value("fechaExpiracion").toString(),
-                                 tarjetaCredito.value("numeroTarjeta").toString(),
-                                 tarjetaCredito.value("cvv").toString());
+            ui->tableTarjetaCredito->setRowCount(0);
+            QJsonArray array = QJsonDocument::fromJson(responseData).array();
+            for (const QJsonValue &value : array)
+            {
+                QFlexibleJsonObject tarjetaCredito(value.toObject());
+                appendTarjetaCredito(tarjetaCredito.value("Id").toInt(),
+                                     tarjetaCredito.value("Titular").toString(),
+                                     tarjetaCredito.value("FechaExpiracion").toString(),
+                                     tarjetaCredito.value("NumeroTarjeta").toString(),
+                                     tarjetaCredito.value("CVV").toString());
+            }
+            break;
         }
-    }
-    else if (m_operation == Post)
-    {
-        on_getAllTarjetaCreditoButton_clicked();
-    }
-    else if (m_operation == Put)
-    {
-        on_getAllTarjetaCreditoButton_clicked();
-    }
-    else if (m_operation == Delete)
-    {
-        on_getAllTarjetaCreditoButton_clicked();
+        case Post: case Put: case Delete:
+        {
+            on_getAllTarjetaCreditoButton_clicked();
+            break;
+        }
     }
 }
 
@@ -133,8 +138,3 @@ void MainWindow::appendTarjetaCredito(int Id,
     ui->tableTarjetaCredito->setItem(row, 3, new QTableWidgetItem(NumeroTarjeta));
     ui->tableTarjetaCredito->setItem(row, 4, new QTableWidgetItem(CVV));
 }
-
-
-
-
-

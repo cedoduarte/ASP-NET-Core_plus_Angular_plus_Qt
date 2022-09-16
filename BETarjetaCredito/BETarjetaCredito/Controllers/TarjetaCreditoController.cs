@@ -111,34 +111,20 @@ namespace BETarjetaCredito.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
-            // begins the transaction
-            using var txn = await this.ctx.Database.BeginTransactionAsync();
-            try
-            {
-                var existingTarjetaCredito = await this.ctx.TarjetaCredito.FindAsync(id);
-                if (existingTarjetaCredito is null)
-                {
-                    return NotFound();
-                }
-                this.ctx.Remove(existingTarjetaCredito);
-                await this.ctx.SaveChangesAsync();
-
-                // ends the transaction
-                await txn.CommitAsync();
-
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return await RemoveTarjetaCreditoFromId(id);
         }
 
         /**
          * removes the TarjetaCredito with specified "id"
+         * this end-point is used by Qt frontend application
          */
         [HttpPost("eliminar/{id:int}")]
         public async Task<ActionResult> PostEliminar(int id)
+        {
+            return await RemoveTarjetaCreditoFromId(id);
+        }
+
+        private async Task<ActionResult> RemoveTarjetaCreditoFromId(int id)
         {
             // begins the transaction
             using var txn = await this.ctx.Database.BeginTransactionAsync();
